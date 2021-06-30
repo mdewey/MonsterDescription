@@ -30,7 +30,7 @@ namespace MonsterDescription.Services
       if (start.HasValue)
       {
         start++;
-        while (data[start.GetValueOrDefault()].Name == "#text")
+        while (data[start.GetValueOrDefault()].Name == "#text" || data[start.GetValueOrDefault()].Name == "i")
         {
           rv.Descriptions.Add(data[start.GetValueOrDefault()].InnerHtml);
           start++;

@@ -23,7 +23,10 @@ namespace MonsterDescription.Controllers
     {
       Console.WriteLine(url);
       var response = await client.GetAsync(url);
-      response.EnsureSuccessStatusCode();
+      if (!response.IsSuccessStatusCode)
+      {
+        throw new Exception($"The data source return a {response.StatusCode} for {url}");
+      }
       string responseBody = await response.Content.ReadAsStringAsync();
       var htmlDoc = new HtmlDocument();
       htmlDoc.LoadHtml(responseBody);
@@ -36,12 +39,19 @@ namespace MonsterDescription.Controllers
     [HttpGet("{name}")]
     public async Task<ActionResult> GetBuildStatusAsync(string name)
     {
-      var query = String.Join(' ', name.Split(" ").Select(s => char.ToUpper(s[0]) + s.Substring(1)));
-      var url = $"https://aonprd.com/MonsterDisplay.aspx?ItemName={query}";
-      var monster = await GetMonster(url);
-      monster.FullLink = url;
-      monster.Name = name;
-      return Ok(new { monster });
+      try
+      {
+        var query = String.Join(' ', name.Split(" ").Select(s => char.ToUpper(s[0]) + s.Substring(1)));
+        var url = $"https://aonprd.com/MonsterDisplay.aspx?ItemName={query}";
+        var monster = await GetMonster(url);
+        monster.FullLink = url;
+        monster.Name = name;
+        return Ok(new { monster });
+      }
+      catch (System.Exception ex)
+      {
+        return Ok(new { Status = "Failed", Message = ex.Message });
+      }
     }
   }
 }

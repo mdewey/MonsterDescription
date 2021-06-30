@@ -36,7 +36,8 @@ namespace MonsterDescription.Controllers
     [HttpGet("{name}")]
     public async Task<ActionResult> GetBuildStatusAsync(string name)
     {
-      var url = $"https://aonprd.com/MonsterDisplay.aspx?ItemName={char.ToUpper(name[0]) + name.Substring(1)}";
+      var query = String.Join(' ', name.Split(" ").Select(s => char.ToUpper(s[0]) + s.Substring(1)));
+      var url = $"https://aonprd.com/MonsterDisplay.aspx?ItemName={query}";
       var monster = await GetMonster(url);
       monster.FullLink = url;
       monster.Name = name;

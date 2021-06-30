@@ -38,14 +38,17 @@ namespace MonsterDescription.Controllers
     [HttpPost]
     public async Task<ActionResult> GetBuildStatusAsync([FromForm] SlackRequest data)
     {
-      var name = data.text;
-      var url = $"https://aonprd.com/MonsterDisplay.aspx?ItemName={char.ToUpper(name[0]) + name.Substring(1)}";
-      var monster = await GetMonster(url);
-      monster.FullLink = url;
-      monster.Name = name;
-      var response = new
+
+      try
       {
-        blocks = new List<Object>{
+        var name = data.text;
+        var url = $"https://aonprd.com/MonsterDisplay.aspx?ItemName={char.ToUpper(name[0]) + name.Substring(1)}";
+        var monster = await GetMonster(url);
+        monster.FullLink = url;
+        monster.Name = name;
+        var response = new
+        {
+          blocks = new List<Object>{
                 new {
                     type = "header",
                     text= new {
@@ -58,24 +61,68 @@ namespace MonsterDescription.Controllers
                     type = "divider",
                 },
             }
-      };
-      monster.Descriptions.ForEach(desc =>
-      {
-        response.blocks.Add(new
+        };
+        monster.Descriptions.ForEach(desc =>
         {
-          type = "section",
-          text = new
+          response.blocks.Add(new
           {
-            type = "mrkdwn",
-            text = desc
-          }
+            type = "section",
+            text = new
+            {
+              type = "mrkdwn",
+              text = desc
+            }
+          });
         });
-      });
-      return Ok(new
+        return Ok(new
+        {
+          blocks = response.blocks,
+          response_type = "in_channel"
+        });
+
+      }
+      catch (System.Exception ex)
       {
-        blocks = response.blocks,
-        response_type = "in_channel"
-      });
+        var response = new
+        {
+          blocks = new List<Object>{
+                new {
+                    type = "header",
+                    text= new {
+                        type= "plain_text",
+                        text= $":cowboy: Well looky here partner :clown:",
+                        emoji= true
+                    }
+                },
+                new {
+                    type = "divider",
+                },
+                new {
+                  type = "section",
+                  text = new
+                  {
+                    type = "mrkdwn",
+                    text = "Hey rodeo clown, check the logs for more"
+                  }
+                },
+                new {
+                  type = "section",
+                  text = new
+                  {
+                    type = "mrkdwn",
+                    text = ex.Message
+                  }
+                }
+            }
+        };
+
+        return Ok(new
+        {
+          blocks = response.blocks,
+          response_type = "in_channel"
+        });
+
+      }
     }
   }
 }

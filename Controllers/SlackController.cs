@@ -78,7 +78,7 @@ namespace MonsterDescription.Controllers
                     type = "header",
                     text= new {
                         type= "plain_text",
-                        text= $":meow-cowboy: Well looky here partner :meow-cowboy:",
+                        text= $":meow_cowboy: Well looky here partner :meow_cowboy:",
                         emoji= true
                     }
                 },

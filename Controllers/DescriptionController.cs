@@ -17,23 +17,11 @@ namespace MonsterDescription.Controllers
 
   public class DescriptionController : ControllerBase
   {
-    static readonly HttpClient client = new HttpClient();
+    private readonly IDescriptionRepository _repository;
 
-    private async Task<Description> GetMonster(string url)
+    public DescriptionController(IDescriptionRepository repository)
     {
-      Console.WriteLine(url);
-      var response = await client.GetAsync(url);
-      if (!response.IsSuccessStatusCode)
-      {
-        throw new Exception($"The data source return a {response.StatusCode} for {url}");
-      }
-      string responseBody = await response.Content.ReadAsStringAsync();
-      var htmlDoc = new HtmlDocument();
-      htmlDoc.LoadHtml(responseBody);
-
-      var description = new DescriptionParser(responseBody).ShowData().Parse();
-
-      return description;
+      this._repository = repository;
     }
 
     [HttpGet("{name}")]
@@ -41,11 +29,7 @@ namespace MonsterDescription.Controllers
     {
       try
       {
-        var query = String.Join(' ', name.Split(" ").Select(s => char.ToUpper(s[0]) + s.Substring(1)));
-        var url = $"https://aonprd.com/MonsterDisplay.aspx?ItemName={query}";
-        var monster = await GetMonster(url);
-        monster.FullLink = url;
-        monster.Name = name;
+        var monster = await this._repository.QueryAsync(name);
         return Ok(new { monster });
       }
       catch (System.Exception ex)

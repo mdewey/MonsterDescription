@@ -11,6 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using MonsterDescription.Services;
 
 namespace MonsterDescription
 {
@@ -35,6 +36,7 @@ namespace MonsterDescription
       {
         c.SwaggerDoc("v1", new OpenApiInfo { Title = "MonsterDescription", Version = "v1" });
       });
+      services.AddScoped<IDescriptionRepository, DescriptionRepository>();
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

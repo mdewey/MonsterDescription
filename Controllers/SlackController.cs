@@ -19,20 +19,11 @@ namespace MonsterDescription.Controllers
   [ApiController]
   public class SlackController : ControllerBase
   {
-    static readonly HttpClient client = new HttpClient();
+    private readonly IDescriptionRepository _repository;
 
-    private async Task<Description> GetMonster(string url)
+    public SlackController(IDescriptionRepository repository)
     {
-      Console.WriteLine(url);
-      var response = await client.GetAsync(url);
-      response.EnsureSuccessStatusCode();
-      string responseBody = await response.Content.ReadAsStringAsync();
-      var htmlDoc = new HtmlDocument();
-      htmlDoc.LoadHtml(responseBody);
-
-      var description = new DescriptionParser(responseBody).ShowData().Parse();
-
-      return description;
+      this._repository = repository;
     }
 
     [HttpPost]
@@ -42,10 +33,7 @@ namespace MonsterDescription.Controllers
       try
       {
         var name = data.text;
-        var url = $"https://aonprd.com/MonsterDisplay.aspx?ItemName={char.ToUpper(name[0]) + name.Substring(1)}";
-        var monster = await GetMonster(url);
-        monster.FullLink = url;
-        monster.Name = name;
+        var monster = await this._repository.QueryAsync(name);
         var response = new
         {
           blocks = new List<Object>{
@@ -90,7 +78,7 @@ namespace MonsterDescription.Controllers
                     type = "header",
                     text= new {
                         type= "plain_text",
-                        text= $":cowboy: Well looky here partner :clown:",
+                        text= $":meow-cowboy: Well looky here partner :meow-cowboy:",
                         emoji= true
                     }
                 },
